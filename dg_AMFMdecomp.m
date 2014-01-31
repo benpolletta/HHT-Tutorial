@@ -6,9 +6,6 @@ function [A, F] = dg_AMFMdecomp(imf, method, verboseflag)
 % method: optional param, see Matlab 'interp1' function.  Default =
 %   'spline'.
 
-%$Rev: 97 $
-%$Date: 2011-01-14 21:06:08 -0500 (Fri, 14 Jan 2011) $
-%$Author: dgibson $
 
 %REFERENCES
 %
