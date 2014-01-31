@@ -12,6 +12,4 @@
 %   another Commit did indeed raise my count of "commits ahead" from 1 to 2
 %   as I imagined it might, and my "commits behind" remains at zero.  It
 %   seems to be a two-layered commit process whereby local commits
-%   presumably do something locally without changing the remote repos, and
-%   then clicking on "sync" commits all the local commits at once to the
-%   repos.
+%   presumably do something locally without changing the 
