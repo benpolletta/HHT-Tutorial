@@ -8,3 +8,4 @@
 %   Master branch, I have to commit it back to the Master branch before I
 %   can even so much as *look* at another branch.  But we probably don't
 %   want to actually use branches anyway (point for discussion).
+%       Hmmm, I wonder what happens if I click on "sync"?
