@@ -15,3 +15,4 @@
 %   presumably do something locally without changing the remote repos, and
 %   then clicking on "sync" commits all the local commits at once to the
 %   repos.
+%Mikio - let's see how this goes.
