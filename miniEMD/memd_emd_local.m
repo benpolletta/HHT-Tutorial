@@ -1,4 +1,4 @@
-function [imf,ort] = memd_emd(varargin)
+function [imf,ort] = memd_emd_local(varargin)
 % EMDOS : Computes the EMD by Optimisation on Splines, implements the
 % method described in [1]. Uses either the standard EMD [2,3] or the OS
 % algorithm [1].
@@ -82,7 +82,7 @@ function [imf,ort] = memd_emd(varargin)
 
 
 % Gets the parameter
-[s,stop,alpha,maxmodes,t,liss,postprocess,preprocess,pre_params] = ...
+[s,stop,alpha,maxmodes,t,liss,local,postprocess,preprocess,pre_params] = ...
     init(varargin{:});
 
 k = 1;
@@ -116,8 +116,16 @@ while ~ memd_stop_emd(r) && (k < maxmodes+1 || maxmodes == 0)
         % - w.*envmoy, where w is a weight vector like sx below. I'm not
         % sure if this would be accompanied by a change in the stopping
         % criteria.
-        nr = r-envmoy; % nr stands for "new r".
-        
+        switch(local)
+            case 'y'
+                amp = mean(abs(envmax-envmin))/2; % Half of mean difference of max. and min. envelopes is the mean amp. of the signal.
+                sx = abs(envmoy)./amp; % Divide underlying trend by this mean amplitude at each point.
+                w = sx > alpha;
+                w = smooth(w);
+                nr = r - w.*envmoy;
+            case 'n'
+                nr = r-envmoy; % nr stands for "new r".
+        end
         
         switch(stop) % Checking whether to stop sifting, using one of two criteria.
             case 'f'
@@ -160,7 +168,7 @@ imf(k,:) = r';
 end
 
 
-function [s,stop,alpha,maxmodes,t,liss,postprocess,preprocess, ...
+function [s,stop,alpha,maxmodes,t,liss,local,postprocess,preprocess, ...
     pre_params] = init(varargin)
 % INIT : internal function for the initialization of the parameters.
 
@@ -186,10 +194,11 @@ defopts.alpha = 0.05;
 defopts.maxmodes = 8;
 defopts.t = 1:max(size(s));
 defopts.liss = 0;
+defopts.local = 'n';
 defopts.postprocess = [];
 defopts.preprocess = [];
 defopts.pre_params = [];
-opt_fields = {'stop','alpha','maxmodes','t','liss','postprocess',...
+opt_fields = {'stop','alpha','maxmodes','t','liss','local','postprocess',...
     'preprocess','pre_params'};
 opts = defopts;
 

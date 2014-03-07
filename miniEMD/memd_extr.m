@@ -41,15 +41,9 @@ d2 = d(2:n);
 indmin = find(d1.*d2<0 & d1<0)+1; % Places where derivative changes sign from negative to positive are minima.
 indmax = find(d1.*d2<0 & d1>0)+1; % Places where derivative changes sign from positive to negative are maxima.
 
-
-<<<<<<< HEAD
 % When two or more successive points have the same value we consider only
 % one extremum in the middle of the constant area (analogous to approach
 % with zeros above; only works if the signal is uniformly sampled).
-=======
-% when two or more successive points have the same value we consider only one extremum in the middle of the constant area
-% (only works if the signal is uniformly sampled)
->>>>>>> master
 
 if any(d==0)
 
