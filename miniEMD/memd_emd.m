@@ -17,6 +17,16 @@ function [imf,ort] = memd_emd(varargin)
 %           series of fieldname-value pairs that are passed to the Matlab
 %           'struct' function.
 %       alpha       <0.05>  : Stopping criterion parameter [3].
+%       localEMDfunc <[]>   : Handle to a function that accepts as
+%                       arguments: the residual signal <r>, the envelope of
+%                       maxima <envmax>, the envelope of minima <envmin>,
+%                       and the scalar parameter <alpha>; and returns a
+%                       vector of the same size containing the weighting
+%                       function as described in [3] section 3.3.  Since
+%                       this technique can make it impossible to meet an
+%                       independent stopping criterion, the stopping
+%                       criterion is replaced by the condition that all
+%                       elements of the weighting function are zero.
 %       maxmodes    <8>     : Maximum number of IMFs; <0> means no maximum.
 %       postprocess <empty> : Handle to a function that accepts as
 %                       arguments (1) the newly extracted IMF <r> and (2)
@@ -66,24 +76,25 @@ function [imf,ort] = memd_emd(varargin)
 %   [3] G. Rilling, P. Flandrin, and P. Gonc¸alv`es. On empirical mode
 %       decomposition and its algorithms. IEEE-EURASIP workshop on
 %       nonlinear signal and image processing NSIP-03, Grado (I), 2003.
+
 % Thomas Oberlin
 % 12.2011
 % thomas.oberlin@imag.fr
 %
 %NOTES
-% Modified 20-Feb-2014 by Daniel J. GIbson from emdos.m as it appeared in
-% http://www-ljk.imag.fr/membres/Thomas.Oberlin/EMDOS.tar.gz, referenced in
-% [1].
-% There is still some code pertaining to the variable 'liss' that is
-% probably dead code, but I haven't verified that, so I left it in.
+% Modified starting 20-Feb-2014 by Daniel J. GIbson from emdos.m as it
+% appeared in http://www-ljk.imag.fr/membres/Thomas.Oberlin/EMDOS.tar.gz,
+% referenced in [1]. There is still some code pertaining to the variable
+% 'liss' that is probably dead code, but I haven't verified that, so I left
+% it in.
 %EXAMPLES
 % IMFCA1 = memd_emd(CA1theta, 'preprocess', @do_nothing_pre, ...
 %   'postprocess', @do_nothing_post, 'pre_params', '~~barf~~');
 
 
 % Gets the parameter
-[s,stop,alpha,maxmodes,t,liss,postprocess,preprocess,pre_params] = ...
-    init(varargin{:});
+[s, stop, alpha, maxmodes, t, liss, postprocess, preprocess, ...
+    pre_params, localEMDfunc] = init(varargin{:});
 
 k = 1;
 r=s;
@@ -112,18 +123,22 @@ while ~ memd_stop_emd(r) && (k < maxmodes+1 || maxmodes == 0)
         envmin = interp1(tmin,mmin,t,'spline');
         envmax = interp1(tmax,mmax,t,'spline');
         envmoy = (envmin+envmax)/2;
-        nr = r-envmoy;
-        
-        
-        switch(stop)
-            case 'f'
-                % Flandrin
-                amp = mean(abs(envmax-envmin))/2;
-                sx = abs(envmoy)./amp;
-                stop_sift = ~(mean(sx > alpha) > 0.05 | any(sx > 10*alpha));
-            case 'h'
-                % Huang
-                stop_sift = norm(nr-r)/(norm(r)+eps) < alpha;
+        if ~isempty(localEMDfunc)
+            w = feval(localEMDfunc, r, envmax, envmin, alpha);
+            nr = r - w .* envmoy;
+            stop_sift = all(w == 0);
+        else
+            nr = r - envmoy;
+            switch(stop)
+                case 'f'
+                    % Flandrin
+                    amp = mean(abs(envmax-envmin))/2;
+                    sx = abs(envmoy)./amp;
+                    stop_sift = ~(mean(sx > alpha) > 0.05 | any(sx > 10*alpha));
+                case 'h'
+                    % Huang
+                    stop_sift = norm(nr-r)/(norm(r)+eps) < alpha;
+            end
         end
         
         if ~stop_sift
@@ -150,8 +165,8 @@ imf(k,:) = r';
 end
 
 
-function [s,stop,alpha,maxmodes,t,liss,postprocess,preprocess, ...
-    pre_params] = init(varargin)
+function [s, stop, alpha, maxmodes, t, liss, postprocess, preprocess, ...
+    pre_params, localEMDfunc] = init(varargin)
 % INIT : internal function for the initialization of the parameters.
 
 
@@ -179,8 +194,9 @@ defopts.liss = 0;
 defopts.postprocess = [];
 defopts.preprocess = [];
 defopts.pre_params = [];
+defopts.localEMDfunc = [];
 opt_fields = {'stop','alpha','maxmodes','t','liss','postprocess',...
-    'preprocess','pre_params'};
+    'preprocess','pre_params','localEMDfunc'};
 opts = defopts;
 
 if(nargin==1)
@@ -193,11 +209,11 @@ end
 names = fieldnames(inopts);
 for nom = names'
   if ~any(strcmpi(char(nom), opt_fields))
-    error(['bad option field name: ',char(nom)])
+    error(['bad option field name: ',char(nom)]);
   end
   % Et modification des paramètres rentrés
   if ~isempty(eval(['inopts.',char(nom)])) % empty values are discarded
-    eval(['opts.',lower(char(nom)),' = inopts.',char(nom),';'])
+    eval(['opts.', char(nom), ' = inopts.', char(nom),';']);
   end
 end
 
@@ -210,6 +226,7 @@ liss = opts.liss;
 postprocess = opts.postprocess;
 preprocess = opts.preprocess;
 pre_params = opts.pre_params;
+localEMDfunc = opts.localEMDfunc;
 
 
 %% Syntax check
