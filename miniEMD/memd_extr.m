@@ -8,34 +8,38 @@ end
 
 m = length(x);
 
+% Finding zeros.
+
 if nargout > 2
   x1=x(1:m-1);
   x2=x(2:m);
-  indzer = find(x1.*x2<0);
+  indzer = find(x1.*x2<0); % Zeros are places where x changes from positive to negative.
 
   if any(x == 0)
-    iz = find( x==0 );
+    iz = find( x==0 );  % Zeros are places where x equals zero.
     indz = [];
-    if any(diff(iz)==1)
+    if any(diff(iz)==1) % Unless x equals zero for more than one time point.
       zer = x == 0;
-      dz = diff([0 zer 0]);
-      debz = find(dz == 1);
-      finz = find(dz == -1)-1;
-      indz = round((debz+finz)/2);
+      dz = diff([0 zer 0]); % Zero-one vector; equals one where x equals zero.
+      debz = find(dz == 1); % Indices where x becomes zero after being nonzero.
+      finz = find(dz == -1)-1; % Indices where x is zero before becoming nonzero.
+      indz = round((debz+finz)/2); % Middle index of a stretch of zeros.
     else
       indz = iz;
     end
-    indzer = sort([indzer indz]);
+    indzer = sort([indzer indz]); % Concatenates places where x equals zero and places where x changes sign.
   end
 end
 
-d = diff(x);
+% Now maxima & minima...
+
+d = diff(x); % Looking at "derivative".
 
 n = length(d);
 d1 = d(1:n-1);
 d2 = d(2:n);
-indmin = find(d1.*d2<0 & d1<0)+1;
-indmax = find(d1.*d2<0 & d1>0)+1;
+indmin = find(d1.*d2<0 & d1<0)+1; % Places where derivative changes sign from negative to positive are minima.
+indmax = find(d1.*d2<0 & d1>0)+1; % Places where derivative changes sign from positive to negative are maxima.
 
 
 % when two or more successive points have the same value we consider only one extremum in the middle of the constant area
