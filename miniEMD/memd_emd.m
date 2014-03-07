@@ -1,4 +1,4 @@
-function [imf,ort] = memd_emd(varargin)
+function [imf,ort] = memd_emd_local(varargin)
 % EMDOS : Computes the EMD by Optimisation on Splines, implements the
 % method described in [1]. Uses either the standard EMD [2,3] or the OS
 % algorithm [1].
@@ -82,7 +82,7 @@ function [imf,ort] = memd_emd(varargin)
 
 
 % Gets the parameter
-[s,stop,alpha,maxmodes,t,liss,postprocess,preprocess,pre_params] = ...
+[s,stop,alpha,maxmodes,t,liss,local,postprocess,preprocess,pre_params] = ...
     init(varargin{:});
 
 k = 1;
@@ -116,8 +116,21 @@ while ~ memd_stop_emd(r) && (k < maxmodes+1 || maxmodes == 0)
         % - w.*envmoy, where w is a weight vector like sx below. I'm not
         % sure if this would be accompanied by a change in the stopping
         % criteria.
-        nr = r-envmoy; % nr stands for "new r".
-        
+        if strcmp(local,'y')
+            amp = mean(abs(envmax-envmin))/2; % Half of mean difference of max. and min. envelopes is the mean amp. of the signal.
+            sx = abs(envmoy)./amp; % Divide underlying trend by this mean amplitude at each point.
+            w = sx > alpha;
+            
+            % Smoothing
+            winWidth=9;
+            halfWidth=round(winWidth/2);
+            gaussWin=gausswin(winWidth);
+            gaussWin=gaussWin/sum(gaussWin);
+            w = conv(double(w),gaussWin);
+            w = w(halfWidth:end-halfWidth+1);
+            envmoy = w.*envmoy;
+        end
+        nr = r - envmoy; % nr stands for "new r".
         
         switch(stop) % Checking whether to stop sifting, using one of two criteria.
             case 'f'
@@ -160,7 +173,7 @@ imf(k,:) = r';
 end
 
 
-function [s,stop,alpha,maxmodes,t,liss,postprocess,preprocess, ...
+function [s,stop,alpha,maxmodes,t,liss,local,postprocess,preprocess, ...
     pre_params] = init(varargin)
 % INIT : internal function for the initialization of the parameters.
 
@@ -183,7 +196,7 @@ end
 % Default parameters.
 defopts.stop = 'f';
 defopts.alpha = 0.05;
-defopts.maxmodes = 8;
+defopts.maxmodes = 20;
 defopts.t = 1:max(size(s));
 defopts.liss = 0;
 defopts.local = 'n';
@@ -218,6 +231,7 @@ alpha = opts.alpha;
 maxmodes = opts.maxmodes;
 t = opts.t;
 liss = opts.liss;
+local = opts.local;
 postprocess = opts.postprocess;
 preprocess = opts.preprocess;
 pre_params = opts.pre_params;

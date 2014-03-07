@@ -76,7 +76,7 @@ figure;plot_imf(IMFCA1,t,'CA1')
 figure;plot_imf(IMFDG,t,'DG')
 
 %plot CWT magnitude of IMFs
-nIMF = 7;
+nIMF = 20;
 for j = 1:nIMF
     %     subplot(nIMF,1,j)
     %     psd(Hs,IMFCA1(j,:),'Fs',fs)
