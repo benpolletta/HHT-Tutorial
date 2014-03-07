@@ -1,0 +1,155 @@
+NCU2009 folder ---40 m files
+==============total-list====================================
+2009/10/08  AM 01:34             4,316 blocknormalize.m
+2009/10/08  PM 04:07             5,770 confidenceLine.m
+2009/10/08  PM 04:07             2,115 dist_value.m
+2009/10/08  PM 03:59             5,276 eemd.m
+2009/10/08  PM 03:37               853 emax.m
+2009/10/08  PM 03:36               867 emin.m
+2009/10/08  PM 04:52             9,997 endprocess1.m
+2009/10/13  PM 09:40             5,152 ex02d.m
+2009/10/08  PM 03:59             4,361 extrema.m
+2009/10/27  AM 04:03             7,935 fa.m
+2009/10/08  AM 01:39             3,356 FAacos.m
+2009/10/21  PM 04:40             3,013 FAcosfor.m
+2009/10/08  AM 01:42             1,528 FAhilbert.m
+2009/10/27  AM 04:11             1,603 FAimphilbert.m
+2009/10/08  AM 01:42             7,896 FAquadrature.m
+2009/10/08  AM 01:38             6,695 FAzc.m
+2009/10/08  PM 03:46             3,103 findcriticalpoints.m
+2009/10/08  PM 04:41             6,536 findEE.m
+2009/10/12  AM 01:41            11,957 findEEfsp.m
+2009/10/11  PM 12:08            13,153 fspecial.m
+2009/10/12  AM 12:01             3,794 FSPHSP.m
+2009/10/11  PM 04:47             2,207 hilbert.m
+2009/10/08  AM 01:37             1,683 hilbertnormalize.m
+2009/10/27  AM 04:06            18,846 hilbtm.m
+2009/10/08  PM 03:58             3,502 ifndq.m
+2009/10/08  AM 01:36             3,610 linearnormalize.m
+2009/10/09  AM 12:36             2,614 local_max.m
+2009/10/08  PM 04:52               515 medianfilter.m
+2009/10/27  AM 04:48             8,575 nnspa.m
+2009/10/27  AM 04:39             8,085 nnspe.m
+2009/10/09  AM 12:20             7,539 nspplota.m
+2009/10/09  AM 12:18             7,520 nspplote.m
+2009/10/08  AM 01:35             3,651 pchipnormalize.m
+2009/10/11  PM 04:16               664 ratio1.m
+2009/10/11  PM 04:16               914 ratioa.m
+2009/10/08  PM 04:06             2,420 significanceIMF.m
+2009/10/08  PM 04:07             2,730 signiplotIMF.m
+2009/10/08  PM 03:50             1,525 skiphilbt_m.m
+2009/10/08  AM 01:35             3,645 splinenormalize.m
+2009/10/08  AM 01:34             4,204 splinenormalizeep.m
+===============================================================
+Ver 1.0 ,Release from NCU RCADA
+Director:Norden E. ,Huang
+code and footnote:Sheng-Chung ,Su
+This version of HHT matlab code is for Education Purpose 
+DATE:2009/10/27
+
+What's new with NCU2009?
+1.M files with complex structures are equipped with footnotes.
+2.Cosine-formula method is in volved in fa.m
+3.Testrun examples are prepared in "NCU2009-Run"  folder
+4.M-files for "Significance for IMFs" are ready.
+5.M-files for "Excessive Extrema" are ready.
+6.A set of "Run matlab code and Learn HHT" examples are ready: 
+==============Frequently asked question=========================
+6.1. compare the difference of HHT and FFT             
+    Q.01-how to show the difference -------ex01.m
+
+==============basic HHT calculation=============================
+6.2.Do EEMD
+    Q.02-how to run eemd-------------------ex02.m
+    Q.03-how to run emd--------------------ex02.m
+6.3.Plot Hilbert Spectrum                
+    how to plot Hilbert-Energy spectrum----ex02.m
+    how to plot Hilbert-Energy spectrum----ex02.m
+                                             
+==============detail IMF Properties calculation=================
+6.4.Significance of IMF 
+    how to Show the significance of IMF----ex05.m
+6.5.I.F.(Instantaneous Frequency) of IMF 
+    how to Show the I.F. values of IMF-----ex03.m
+6.6.E.E(Excessive Extrema) value of IMF
+    how to Show the E.E. values of IMF-----ex04.m
+
+7.Detail test for "Hilbert-Transform calculation" m-file are ready:
+==============detail Hilbert-Transform calculation==============  
+7.1 Improved Hilbert--Lena
+    how to Show the difference of Hilbert and Improved Hilbert -----testfile
+    
+7.2.calculate f(t),a(t) by fa.m--Lena
+    How to Run Hilbert by my favorite method-----fa.m --------------019
+ 
+ 7.2.1 Calculationfa for Instantaneous Frequency
+     How to do IF by acos method -----------------------------------020
+     How to do IF by cosine formula method -------------------------021
+     How to do IF by matlab Hilbert method -------------------------022
+     How to do IF Improved Hilbert method---------------------------023
+     How to do IF Quadrature method---------------------------------024
+     How to do IF by Zero-Crossing method---------------------------025
+ 7.2.2 functions called by fa for Normalization
+     How to do normalize by Block-normalize method------------------026
+     How to do normalize by Hilbert method--------------------------027
+     How to do normalize by Linear-normalize method-----------------028
+     How to do normalize by Hermite-Spline-normalize method---------029
+     How to do normalize by Spline-normalize method-----------------030
+     How to do normalize by Spline-normalize (with favorite end-process) method--031     
+     
+8.Detail test for the others important m-file are ready:  
+==============Frequently asked question=========================
+8.1. HSP and FSP Comparison--Huang             
+    FSPHSP.m----------------------------------001  
+
+==============basic HHT calculation=============================
+8.2.Do EEMD--Wu
+    eemd.m------------------------------------002
+    extrema.m---------------------------------003
+8.3.Plot Hilbert Spectrum-lena                 
+    nnspa.m-----------------------------------004  
+    nnspe.m-----------------------------------005  
+    nspplota.m--------------------------------006  
+    nspplote.m--------------------------------007  
+
+==============detail IMF Properties calculation=================
+8.4.Significance of IMF --Wu
+    confidenceLine.m--------------------------008
+    dist_value.m------------------------------009
+    significanceIMF.m-------------------------010
+    signiplotIMF.m----------------------------011
+8.5.I.F.(Instantaneous Frequency) of IMF --Wu
+    ifndq.m-----------------------------------012
+8.6.E.E(Excessive Extrema) value of IMF--Huang
+    findEE.m----------------------------------013
+    findEEfsp.m-------------------------------014
+    ratio1.m----------------------------------015
+    ratioa.m----------------------------------016
+    
+==============detail Hilbert-Transform calculation==============  
+8.7. Improved Hilbert--Lena
+    hilbtm.m----------------------------------017  
+    skiphilbt_m.m-----------------------------018
+8.8.calculate f(t),a(t) by fa.m--Lena
+    fa.m--------------------------------------019
+ 8.8.1 functions called by fa for Instantaneous Frequency
+     FAacos.m---------------------------------020
+     FAcosfor.m-------------------------------021
+     FAhilbert.m------------------------------022
+     FAimphilbert.m---------------------------023
+     FAquadrature.m---------------------------024
+     FAzc.m-----------------------------------025
+ 8.8.2 functions called by fa for Normalization
+     blocknormalize.m-------------------------026
+     hilbertnormalize.m-----------------------027
+     linearnormalize.m------------------------028
+     pchipnormalize.m-------------------------029
+     splinenormalize.m------------------------030
+     splinenormalizeep.m----------------------031
+ 8.8.3  other functions called by fa 
+     emax.m-----------------------------------032
+     emin.m-----------------------------------033
+     endprocess1.m----------------------------034
+     findcriticalpoints.m---------------------035
+     local_max.m------------------------------036
+     medianfilter.m---------------------------037       
