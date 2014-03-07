@@ -186,10 +186,11 @@ defopts.alpha = 0.05;
 defopts.maxmodes = 8;
 defopts.t = 1:max(size(s));
 defopts.liss = 0;
+defopts.local = 'n';
 defopts.postprocess = [];
 defopts.preprocess = [];
 defopts.pre_params = [];
-opt_fields = {'stop','alpha','maxmodes','t','liss','postprocess',...
+opt_fields = {'stop','alpha','maxmodes','t','liss','local','postprocess',...
     'preprocess','pre_params'};
 opts = defopts;
 
