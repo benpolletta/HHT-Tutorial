@@ -63,7 +63,7 @@ function [imf,ort] = memd_emd(varargin)
 %       Tung, and H. Liu. The empirical mode decomposition and the Hilbert
 %       spectrum for nonlinear and non-stationary time series analysis.
 %       Proc. R. Soc. Lond. A 1998 454: 903-995
-%   [3] G. Rilling, P. Flandrin, and P. Gonc¸alv`es. On empirical mode
+%   [3] G. Rilling, P. Flandrin, and P. Gonc??alv`es. On empirical mode
 %       decomposition and its algorithms. IEEE-EURASIP workshop on
 %       nonlinear signal and image processing NSIP-03, Grado (I), 2003.
 % Thomas Oberlin
@@ -109,36 +109,42 @@ while ~ memd_stop_emd(r) && (k < maxmodes+1 || maxmodes == 0)
     
     while ~stop_sift
         [tmin,tmax,mmin,mmax] = memd_boundary_conditions(indmin,indmax,t,r,r,6);
-        envmin = interp1(tmin,mmin,t,'spline');
-        envmax = interp1(tmax,mmax,t,'spline');
-        envmoy = (envmin+envmax)/2;
-        nr = r-envmoy;
+        envmin = interp1(tmin,mmin,t,'spline'); % Creates min envelope.
+        envmax = interp1(tmax,mmax,t,'spline'); % Creates max envelope.
+        envmoy = (envmin+envmax)/2; % Creates mean of min and max envelopes (underlying nonstationary/possibly oscillatory trend).
+        nr = r-envmoy; % nr stands for "new r".
         
         
-        switch(stop)
+        switch(stop) % Checking whether to stop sifting, using one of two criteria.
             case 'f'
                 % Flandrin
-                amp = mean(abs(envmax-envmin))/2;
-                sx = abs(envmoy)./amp;
-                stop_sift = ~(mean(sx > alpha) > 0.05 | any(sx > 10*alpha));
+                amp = mean(abs(envmax-envmin))/2; % Half of mean difference of max. and min. envelopes is the mean amp. of the signal.
+                sx = abs(envmoy)./amp; % Divide underlying trend by this mean amplitude at each point.
+                % Stop sifting if trend/amp is greater than alpha at fewer
+                % than 5% of timepoints (i.e. trend/amp <= alpha 95% of the
+                % time), and trend/amp is never bigger than 10*alpha. 
+                stop_sift = ~(mean(sx > alpha) > 0.05 | any(sx > 10*alpha)); 
             case 'h'
                 % Huang
-                stop_sift = norm(nr-r)/(norm(r)+eps) < alpha;
+                stop_sift = norm(nr-r)/(norm(r)+eps) < alpha; 
+                % Stop sifting if the amplitude (2-norm) of the residual is
+                % a fraction less than alpha of the signal started with.
         end
         
         if ~stop_sift
-            r=nr;
+            r=nr; % Replaces signal with new signal.
             aux=aux+1;
-            [indmin,indmax] = memd_extr(r);
+            [indmin,indmax] = memd_extr(r); % Replaces min and max indices with new ones.
         end
     end
     
+    % Defining IMF, possibly with some postprocessing.
     if ~isempty(postprocess)
         imf(k,:) =  feval(postprocess, r, preprocess_auxdata)'; %#ok<AGROW>
     else
         imf(k,:) =  r'; %#ok<AGROW>
     end
-    r = old_r - r;
+    r = old_r - r; % Defining signal as signal minus IMF.
     k = k+1;
     
 end
@@ -170,7 +176,7 @@ elseif nargin > 2
   end
 end
 
-% Paramètres par défaut
+% Default parameters.
 defopts.stop = 'f';
 defopts.alpha = 0.05;
 defopts.maxmodes = 8;
@@ -195,13 +201,13 @@ for nom = names'
   if ~any(strcmpi(char(nom), opt_fields))
     error(['bad option field name: ',char(nom)])
   end
-  % Et modification des paramètres rentrés
+  % Et modification des param??tres rentr??s
   if ~isempty(eval(['inopts.',char(nom)])) % empty values are discarded
     eval(['opts.',lower(char(nom)),' = inopts.',char(nom),';'])
   end
 end
 
-% Mise à jour
+% Mise ?? jour
 stop = opts.stop;
 alpha = opts.alpha;
 maxmodes = opts.maxmodes;
