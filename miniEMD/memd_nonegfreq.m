@@ -14,7 +14,7 @@ hfunc = hilbert(r);
 th = unwrap(angle(hfunc));
 freq = [NaN diff(th)];
 isbad = freq < 0 | sx > 10*alpha;
-if sum(isbad) > length(isbad)/2
+if sum(isbad) > length(isbad)/2         % Checking that more than half of indices are bad.
     w = ones(size(r));
 else
     w = memd_smoothBinSeries(isbad, width);
