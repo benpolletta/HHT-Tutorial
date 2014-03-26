@@ -63,7 +63,7 @@ if any(d==0)
       fins = [];
     end
   end
-  if length(debs) > 0
+  if ~isempty(debs)
     if fins(end) == m
       if length(debs) > 1
         debs = debs(1:(end-1));
@@ -90,11 +90,11 @@ if any(d==0)
     end
   end
 
-  if length(imax) > 0
+  if ~isempty(imax)
     indmax = sort([indmax imax]);
   end
 
-  if length(imin) > 0
+  if ~isempty(imin)
     indmin = sort([indmin imin]);
   end
 

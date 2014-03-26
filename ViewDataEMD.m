@@ -23,7 +23,7 @@ sigma   = .2;%[sec]
 sigSamp = sigma*fs;
 w       = sqrt(sqrt(2)/sigSamp)*exp(-pi*tw.*tw/sigSamp/sigSamp);
 overlap = NFFT-1;
-[SpecCA1 T F]=spectrogram(CA1theta,w,overlap,NFFT,fs);%derive gaussian windowed spectrogram
+[SpecCA1, T, F]=spectrogram(CA1theta,w,overlap,NFFT,fs);%deriv gaussian windowed spectrogram
 figure;imagesc(F,T,abs(SpecCA1));set(gca,'YDir','normal');
 ylim([0 150])
 set(gca,'YTick',[0:10:150])
@@ -31,7 +31,7 @@ grid on
 xlabel('time (sec)');ylabel('Hz')
 title('Gabor spectrogram CA1 LFP \theta')
 
-[SpecDG F T]=spectrogram(DGLFP,w,overlap,NFFT,fs);%derive gaussian windowed spectrogram
+[SpecDG, F, T]=spectrogram(DGLFP,w,overlap,NFFT,fs);%deriv gaussian windowed spectrogram
 figure;imagesc(T,F,abs(SpecDG));set(gca,'YDir','normal');
 ylim([0 150])
 set(gca,'YTick',[0:10:150])
@@ -66,11 +66,23 @@ ylim([0 150])
 
 %% HHT IF diagram
 
-%Do EMD using conventional algorithm
+% %Do EMD using conventional algorithm
 % IMFCA1 = emdos(CA1theta,'method','emd');
 % IMFDG  = emdos(DGLFP,'method','emd');
-IMFCA1 = memd_emd(CA1theta,struct('local','y'));
-IMFDG  = memd_emd(DGLFP,struct('local','y'));
+
+%Do EMD using BP's local algorithm.
+IMFCA1 = memd_emd_local(CA1theta,struct('local','y'));
+IMFDG  = memd_emd_local(DGLFP,struct('local','y'));
+
+% %Do EMD using Dan's local EMD, with Dan's "remove negative frequencies" weights.
+% emd_opts=struct('localEMDfunc',@memd_nonegfreq);
+% IMFCA1 = memd_emd(CA1theta,emd_opts);
+% IMFDG = memd_emd(DGLFP,emd_opts);
+
+% %Do EMD using Dan's local EMD, with Flandrin-style weights.
+% emd_opts=struct('localEMDfunc',@memd_flandrin_weights);
+% IMFCA1 = memd_emd(CA1theta,emd_opts);
+% IMFDG = memd_emd(DGLFP,emd_opts);
 
 figure;plot_imf(IMFCA1,t,'CA1')
 figure;plot_imf(IMFDG,t,'DG')
