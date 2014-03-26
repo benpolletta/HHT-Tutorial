@@ -73,7 +73,7 @@ function [imf,ort] = memd_emd(varargin)
 %       Tung, and H. Liu. The empirical mode decomposition and the Hilbert
 %       spectrum for nonlinear and non-stationary time series analysis.
 %       Proc. R. Soc. Lond. A 1998 454: 903-995
-%   [3] G. Rilling, P. Flandrin, and P. Gonc¸alv`es. On empirical mode
+%   [3] G. Rilling, P. Flandrin, and P. Gonc??alv`es. On empirical mode
 %       decomposition and its algorithms. IEEE-EURASIP workshop on
 %       nonlinear signal and image processing NSIP-03, Grado (I), 2003.
 
@@ -101,6 +101,8 @@ r=s;
 imf = [];
 preprocess_auxdata = [];
 
+figure()
+
 %main loop : requires at least 3 extrema to proceed
 while ~ memd_stop_emd(r) && (k < maxmodes+1 || maxmodes == 0)
     old_r = r;
@@ -126,7 +128,11 @@ while ~ memd_stop_emd(r) && (k < maxmodes+1 || maxmodes == 0)
         if ~isempty(localEMDfunc)
             w = feval(localEMDfunc, r, envmax, envmin, alpha);
             nr = r - w .* envmoy;
-            stop_sift = all(w == 0);
+            plot(nr)
+%             stop_sift = all(w == 0);
+            amp = mean(abs(envmax-envmin))/2;
+            sx = abs(envmoy)./amp;
+            stop_sift = ~(mean(sx > alpha) > 0.05 | any(sx > 10*alpha));
         else
             nr = r - envmoy;
             switch(stop)
@@ -185,7 +191,7 @@ elseif nargin > 2
   end
 end
 
-% Paramètres par défaut
+% Param??tres par d??faut
 defopts.stop = 'f';
 defopts.alpha = 0.05;
 defopts.maxmodes = 8;
@@ -211,13 +217,13 @@ for nom = names'
   if ~any(strcmpi(char(nom), opt_fields))
     error(['bad option field name: ',char(nom)]);
   end
-  % Et modification des paramètres rentrés
+  % Et modification des param??tres rentr??s
   if ~isempty(eval(['inopts.',char(nom)])) % empty values are discarded
     eval(['opts.', char(nom), ' = inopts.', char(nom),';']);
   end
 end
 
-% Mise à jour
+% Mise ?? jour
 stop = opts.stop;
 alpha = opts.alpha;
 maxmodes = opts.maxmodes;
