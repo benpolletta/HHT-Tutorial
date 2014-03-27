@@ -87,38 +87,38 @@ IMFDG  = memd_emd_local(DGLFP,struct('local','y'));
 plot_imf_1axis(IMFCA1,t,'CA1')
 plot_imf_1axis(IMFDG,t,'DG')
 
-%plot CWT magnitude of IMFs
-nIMF = 20;
-for j = 1:min(size(IMFDG,1),nIMF)
-    %     subplot(nIMF,1,j)
-    %     psd(Hs,IMFCA1(j,:),'Fs',fs)
-    sig1 =  struct('val',IMFDG(j,:),'period',dt);
-    cwtS1 = cwtft(sig1,'scales',1./[1:1:200]);
-    scales = cwtS1.scales;
-    MorletFourierFactor = 4*pi/(6+sqrt(2+6^2));
-    freq = 1./(scales.*MorletFourierFactor);
-    figure;imagesc(t,freq,abs(cwtS1.cfs));set(gca,'YDir','normal');
-    xlabel('time (sec)'); ylabel('Pseudo-frequency');
-    title('Morlet spectrogram DG LFP')
-    set(gca,'YTick',[0:10:150])
-    grid on
-    ylim([0 150])
-end
-for j = 1:min(size(IMFCA1,1),nIMF)
-    %     subplot(nIMF,1,j)
-    %     psd(Hs,IMFCA1(j,:),'Fs',fs)
-    sig1 =  struct('val',IMFCA1(j,:),'period',dt);
-    cwtS1 = cwtft(sig1,'scales',1./[1:1:200]);
-    scales = cwtS1.scales;
-    MorletFourierFactor = 4*pi/(6+sqrt(2+6^2));
-    freq = 1./(scales.*MorletFourierFactor);
-    figure;imagesc(t,freq,abs(cwtS1.cfs));set(gca,'YDir','normal');
-    xlabel('time (sec)'); ylabel('Pseudo-frequency');
-    title('Morlet spectrogram CA1 LFP')
-    set(gca,'YTick',[0:10:150])
-    grid on
-    ylim([0 150])
-end
+% %plot CWT magnitude of IMFs
+% nIMF = 20;
+% for j = 1:min(size(IMFDG,1),nIMF)
+%     %     subplot(nIMF,1,j)
+%     %     psd(Hs,IMFCA1(j,:),'Fs',fs)
+%     sig1 =  struct('val',IMFDG(j,:),'period',dt);
+%     cwtS1 = cwtft(sig1,'scales',1./[1:1:200]);
+%     scales = cwtS1.scales;
+%     MorletFourierFactor = 4*pi/(6+sqrt(2+6^2));
+%     freq = 1./(scales.*MorletFourierFactor);
+%     figure;imagesc(t,freq,abs(cwtS1.cfs));set(gca,'YDir','normal');
+%     xlabel('time (sec)'); ylabel('Pseudo-frequency');
+%     title('Morlet spectrogram DG LFP')
+%     set(gca,'YTick',[0:10:150])
+%     grid on
+%     ylim([0 150])
+% end
+% for j = 1:min(size(IMFCA1,1),nIMF)
+%     %     subplot(nIMF,1,j)
+%     %     psd(Hs,IMFCA1(j,:),'Fs',fs)
+%     sig1 =  struct('val',IMFCA1(j,:),'period',dt);
+%     cwtS1 = cwtft(sig1,'scales',1./[1:1:200]);
+%     scales = cwtS1.scales;
+%     MorletFourierFactor = 4*pi/(6+sqrt(2+6^2));
+%     freq = 1./(scales.*MorletFourierFactor);
+%     figure;imagesc(t,freq,abs(cwtS1.cfs));set(gca,'YDir','normal');
+%     xlabel('time (sec)'); ylabel('Pseudo-frequency');
+%     title('Morlet spectrogram CA1 LFP')
+%     set(gca,'YTick',[0:10:150])
+%     grid on
+%     ylim([0 150])
+% end
 
 % %plot multitaper spectra of each IMF
 % TW = 5;

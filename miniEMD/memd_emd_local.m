@@ -102,7 +102,7 @@ while ~ memd_stop_emd(r) && (k < maxmodes+1 || maxmodes == 0)
     % Sifting
     stop_sift=0;
     aux=0;
-    envmoy_all=zeros(20,length(r));
+    envmoy_all=zeros(100,length(r));
     
     if ~isempty(preprocess)
         [r, preprocess_auxdata] = feval(preprocess, r, pre_params);
@@ -136,7 +136,7 @@ while ~ memd_stop_emd(r) && (k < maxmodes+1 || maxmodes == 0)
 %             w = conv(double(w),gaussWin);
 %             w = w(halfWidth:end-halfWidth+1);
             
-            if aux <= 19
+            if aux <= 100
                 w_all(aux+1,:) = w;
             end
             
@@ -170,7 +170,12 @@ while ~ memd_stop_emd(r) && (k < maxmodes+1 || maxmodes == 0)
         
     end
     
-    plot_imf_1axis(w_all,t,sprintf('Weights, Sift %d',aux+1))
+    figure
+    colormap('gray')
+    imagesc(t,1:100,w_all)
+    title(sprintf('Weights, Sift %d',aux+1))
+    
+%     plot_imf_1axis(w_all,t,sprintf('Weights, Sift %d',aux+1))
     
     % Defining IMF, possibly with some postprocessing.
     if ~isempty(postprocess)
