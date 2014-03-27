@@ -70,19 +70,19 @@ ylim([0 150])
 % IMFCA1 = emdos(CA1theta,'method','emd');
 % IMFDG  = emdos(DGLFP,'method','emd');
 
-% %Do EMD using BP's local algorithm.
-% IMFCA1 = memd_emd_local(CA1theta,struct('local','y'));
-% IMFDG  = memd_emd_local(DGLFP,struct('local','y'));
+%Do EMD using BP's local algorithm.
+IMFCA1 = memd_emd_local(CA1theta,struct('local','y'));
+IMFDG  = memd_emd_local(DGLFP,struct('local','y'));
 
 % %Do EMD using Dan's local EMD, with Dan's "remove negative frequencies" weights.
 % emd_opts=struct('localEMDfunc',@memd_nonegfreq);
 % IMFCA1 = memd_emd(CA1theta,emd_opts);
 % IMFDG = memd_emd(DGLFP,emd_opts);
 
-%Do EMD using Dan's local EMD, with Flandrin-style weights.
-emd_opts=struct('localEMDfunc',@memd_flandrin_weights);
-IMFCA1 = memd_emd(CA1theta,emd_opts);
-IMFDG = memd_emd(DGLFP,emd_opts);
+% %Do EMD using Dan's local EMD, with Flandrin-style weights.
+% emd_opts=struct('localEMDfunc',@memd_flandrin_weights);
+% IMFCA1 = memd_emd(CA1theta,emd_opts);
+% IMFDG = memd_emd(DGLFP,emd_opts);
 
 plot_imf_1axis(IMFCA1,t,'CA1')
 plot_imf_1axis(IMFDG,t,'DG')
