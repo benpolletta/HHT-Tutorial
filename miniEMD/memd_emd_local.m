@@ -102,6 +102,7 @@ while ~ memd_stop_emd(r) && (k < maxmodes+1 || maxmodes == 0)
     % Sifting
     stop_sift=0;
     aux=0;
+    envmoy_all=zeros(20,length(r));
     
     if ~isempty(preprocess)
         [r, preprocess_auxdata] = feval(preprocess, r, pre_params);
@@ -119,17 +120,30 @@ while ~ memd_stop_emd(r) && (k < maxmodes+1 || maxmodes == 0)
         if strcmp(local,'y')
             amp = mean(abs(envmax-envmin))/2; % Half of mean difference of max. and min. envelopes is the mean amp. of the signal.
             sx = abs(envmoy)./amp; % Divide underlying trend by this mean amplitude at each point.
-            w = sx > alpha;
+            w = sx > 2*alpha;
             
-            % Smoothing
-            winWidth=9;
-            halfWidth=round(winWidth/2);
-            gaussWin=gausswin(winWidth);
-            gaussWin=gaussWin/sum(gaussWin);
-            w = conv(double(w),gaussWin);
-            w = w(halfWidth:end-halfWidth+1);
+            if sum(w) > length(w)/2         % If more than half of indices are bad, forget local.
+                w = ones(size(r));
+            else
+                w = memd_smoothBinSeries(w, 80);
+            end
+            
+%             % Smoothing
+%             winWidth=9;
+%             halfWidth=round(winWidth/2);
+%             gaussWin=gausswin(winWidth);
+%             gaussWin=gaussWin/sum(gaussWin);
+%             w = conv(double(w),gaussWin);
+%             w = w(halfWidth:end-halfWidth+1);
+            
+            if aux <= 19
+                w_all(aux+1,:) = w;
+            end
+            
             envmoy = w.*envmoy;
+            
         end
+            
         nr = r - envmoy; % nr stands for "new r".
         
         switch(stop) % Checking whether to stop sifting, using one of two criteria.
@@ -153,7 +167,10 @@ while ~ memd_stop_emd(r) && (k < maxmodes+1 || maxmodes == 0)
             aux=aux+1;
             [indmin,indmax] = memd_extr(r); % Replaces min and max indices with new ones.
         end
+        
     end
+    
+    plot_imf_1axis(w_all,t,sprintf('Weights, Sift %d',aux+1))
     
     % Defining IMF, possibly with some postprocessing.
     if ~isempty(postprocess)
