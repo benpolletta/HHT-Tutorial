@@ -1,7 +1,5 @@
 function [imf,ort] = memd_emd(varargin)
-% EMDOS : Computes the EMD by Optimisation on Splines, implements the
-% method described in [1]. Uses either the standard EMD [2,3] or the OS
-% algorithm [1].
+% standard EMD from [2,3] with some tweaks.
 %
 % SYNTAX
 %   imf = memd_emd(s)
@@ -27,6 +25,12 @@ function [imf,ort] = memd_emd(varargin)
 %                       independent stopping criterion, the stopping
 %                       criterion is replaced by the condition that all
 %                       elements of the weighting function are zero.
+%       localEMDparam <{}> : a value containing any additional arguments
+%                       to parameterize the <localEMDfunc>.  Do not use
+%                       a cell array here because the call to 'struct' in
+%                       'init' will do undesirable things with it.
+%                       However, a struct will work fine for passing in
+%                       multiple values of different types.
 %       maxmodes    <8>     : Maximum number of IMFs; <0> means no maximum.
 %       postprocess <empty> : Handle to a function that accepts as
 %                       arguments (1) the newly extracted IMF <r> and (2)
@@ -35,10 +39,10 @@ function [imf,ort] = memd_emd(varargin)
 %                       preprocessing function, the second argument will be
 %                       empty. The function is called immediately following
 %                       the termination of sifting for each IMF. <r> is a
-%                       column vector when passed in to the postprocess
-%                       function, which returns a modified version as a
-%                       column vector. This is where you would e.g. remove
-%                       the masking signal added by <preprocess>.
+%                       row vector when passed in to the postprocess
+%                       function, which must return a modified version as a
+%                       row vector. This is where you would e.g. remove the
+%                       masking signal added by <preprocess>.
 %       preprocess  <empty> : Handle to a function that accepts as
 %                       arguments the residual signal <r> and a value
 %                       (which could be a struct, scalar, cell array, or
@@ -48,11 +52,10 @@ function [imf,ort] = memd_emd(varargin)
 %                       containing any auxiliary data that will be needed
 %                       by the matching 'postprocess'.  The preprocess
 %                       function is executed immediately before beginning
-%                       the sifting for each IMF.  <r> is a column vector
-%                       when passed to the preprocess function, and the
-%                       modified version returned must also be a column
-%                       vector. This is where you would e.g. add a masking
-%                       signal.
+%                       the sifting for each IMF.  <r> is a row vector when
+%                       passed to the preprocess function, and the modified
+%                       version returned must also be a row vector. This is
+%                       where you would e.g. add a masking signal.
 %       pre_params <empty>  : a value containing the parameters needed by
 %                       the matching <preprocess>.
 %       stop        <'f'>   : Kind of sifting stopping criterion : 'h' for
@@ -94,7 +97,7 @@ function [imf,ort] = memd_emd(varargin)
 
 % Gets the parameter
 [s, stop, alpha, maxmodes, t, liss, postprocess, preprocess, ...
-    pre_params, localEMDfunc] = init(varargin{:});
+    pre_params, localEMDfunc, localEMDparam] = init(varargin{:});
 
 k = 1;
 r=s;
@@ -126,7 +129,8 @@ while ~ memd_stop_emd(r) && (k < maxmodes+1 || maxmodes == 0)
         envmax = interp1(tmax,mmax,t,'spline');
         envmoy = (envmin+envmax)/2;
         if ~isempty(localEMDfunc)
-            w = feval(localEMDfunc, r, envmax, envmin, alpha);
+            w = feval(localEMDfunc, r, envmax, envmin, alpha, ...
+                localEMDparam);
             nr = r - w .* envmoy;
             plot(nr)
 %             stop_sift = all(w == 0);
@@ -155,9 +159,9 @@ while ~ memd_stop_emd(r) && (k < maxmodes+1 || maxmodes == 0)
     end
     
     if ~isempty(postprocess)
-        imf(k,:) =  feval(postprocess, r, preprocess_auxdata)'; %#ok<AGROW>
+        imf(k,:) =  feval(postprocess, r, preprocess_auxdata); %#ok<AGROW>
     else
-        imf(k,:) =  r'; %#ok<AGROW>
+        imf(k,:) =  r; %#ok<AGROW>
     end
     r = old_r - r;
     k = k+1;
@@ -166,15 +170,19 @@ end
 ort = memd_io(s,imf);
 
 % Residue
-imf(k,:) = r';
+if ~isempty(postprocess)
+    imf(k,:) =  feval(postprocess, r, preprocess_auxdata); 
+else
+    imf(k,:) =  r; 
+end
 
 end
 
 
 function [s, stop, alpha, maxmodes, t, liss, postprocess, preprocess, ...
-    pre_params, localEMDfunc] = init(varargin)
+    pre_params, localEMDfunc, localEMDparam] = init(varargin)
 % INIT : internal function for the initialization of the parameters.
-
+% Returns <s> as a row vector.
 
 s = varargin{1};
 if nargin == 2
@@ -201,8 +209,9 @@ defopts.postprocess = [];
 defopts.preprocess = [];
 defopts.pre_params = [];
 defopts.localEMDfunc = [];
+defopts.localEMDparam = {};
 opt_fields = {'stop','alpha','maxmodes','t','liss','postprocess',...
-    'preprocess','pre_params','localEMDfunc'};
+    'preprocess','pre_params','localEMDfunc','localEMDparam'};
 opts = defopts;
 
 if(nargin==1)
@@ -233,6 +242,7 @@ postprocess = opts.postprocess;
 preprocess = opts.preprocess;
 pre_params = opts.pre_params;
 localEMDfunc = opts.localEMDfunc;
+localEMDparam = opts.localEMDparam;
 
 
 %% Syntax check
