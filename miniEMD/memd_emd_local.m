@@ -102,7 +102,7 @@ while ~ memd_stop_emd(r) && (k < maxmodes+1 || maxmodes == 0)
     % Sifting
     stop_sift=0;
     aux=0;
-    envmoy_all=zeros(100,length(r));
+    w_all=zeros(100,length(r));
     
     if ~isempty(preprocess)
         [r, preprocess_auxdata] = feval(preprocess, r, pre_params);
@@ -118,14 +118,14 @@ while ~ memd_stop_emd(r) && (k < maxmodes+1 || maxmodes == 0)
         % sure if this would be accompanied by a change in the stopping
         % criteria.
         if strcmp(local,'y')
-            amp = mean(abs(envmax-envmin))/2; % Half of mean difference of max. and min. envelopes is the mean amp. of the signal.
+            amp = abs(envmax-envmin)/2; % Half of mean difference of max. and min. envelopes is the mean amp. of the signal.
             sx = abs(envmoy)./amp; % Divide underlying trend by this mean amplitude at each point.
             w = sx > 2*alpha;
             
             if sum(w) > length(w)/2         % If more than half of indices are bad, forget local.
                 w = ones(size(r));
             else
-                w = memd_smoothBinSeries(w, 80);
+                w = memd_smoothBinSeries(w, 1000);
             end
             
 %             % Smoothing
