@@ -70,22 +70,26 @@ ylim([0 150])
 % IMFCA1 = emdos(CA1theta,'method','emd');
 % IMFDG  = emdos(DGLFP,'method','emd');
 
-% %Do EMD using local EMD, with Dan's "remove negative frequencies" weights.
+%Do EMD using BP's local algorithm.
+IMFCA1 = memd_emd_local(CA1theta,struct('local','y'));
+IMFDG  = memd_emd_local(DGLFP,struct('local','y'));
+
+% %Do EMD using Dan's local EMD, with Dan's "remove negative frequencies" weights.
 % emd_opts=struct('localEMDfunc',@memd_nonegfreq);
 % IMFCA1 = memd_emd(CA1theta,emd_opts);
 % IMFDG = memd_emd(DGLFP,emd_opts);
 
-%Do EMD using local EMD, with Flandrin-style weights.
-emd_opts=struct('localEMDfunc',@memd_flandrin_weights);
-IMFCA1 = memd_emd(CA1theta,emd_opts);
-IMFDG = memd_emd(DGLFP,emd_opts);
+% %Do EMD using Dan's local EMD, with Flandrin-style weights.
+% emd_opts=struct('localEMDfunc',@memd_flandrin_weights);
+% IMFCA1 = memd_emd(CA1theta,emd_opts);
+% IMFDG = memd_emd(DGLFP,emd_opts);
 
-figure;plot_imf(IMFCA1,t,'CA1')
-figure;plot_imf(IMFDG,t,'DG')
+plot_imf_1axis(IMFCA1,t,'CA1')
+plot_imf_1axis(IMFDG,t,'DG')
 
 %plot CWT magnitude of IMFs
-nIMF = 7;
-for j = 1:nIMF
+nIMF = 20;
+for j = 1:min(size(IMFDG,1),nIMF)
     %     subplot(nIMF,1,j)
     %     psd(Hs,IMFCA1(j,:),'Fs',fs)
     sig1 =  struct('val',IMFDG(j,:),'period',dt);
@@ -95,12 +99,12 @@ for j = 1:nIMF
     freq = 1./(scales.*MorletFourierFactor);
     figure;imagesc(t,freq,abs(cwtS1.cfs));set(gca,'YDir','normal');
     xlabel('time (sec)'); ylabel('Pseudo-frequency');
-    title('Morlet spectrogram DG LFP \theta')
+    title('Morlet spectrogram DG LFP')
     set(gca,'YTick',[0:10:150])
     grid on
     ylim([0 150])
 end
-for j = 1:nIMF
+for j = 1:min(size(IMFCA1,1),nIMF)
     %     subplot(nIMF,1,j)
     %     psd(Hs,IMFCA1(j,:),'Fs',fs)
     sig1 =  struct('val',IMFCA1(j,:),'period',dt);
@@ -110,7 +114,7 @@ for j = 1:nIMF
     freq = 1./(scales.*MorletFourierFactor);
     figure;imagesc(t,freq,abs(cwtS1.cfs));set(gca,'YDir','normal');
     xlabel('time (sec)'); ylabel('Pseudo-frequency');
-    title('Morlet spectrogram DG LFP \theta')
+    title('Morlet spectrogram CA1 LFP')
     set(gca,'YTick',[0:10:150])
     grid on
     ylim([0 150])
