@@ -1,13 +1,18 @@
-%---------------------------------------------------------------------------------------
-% defines new extrema points to extend the interpolations at the edges of the
-% signal (mainly mirror symmetry)
+%-------------------------------------------------------------------------
+% defines new extrema points to extend the interpolations at the edges of
+% the signal (mainly mirror symmetry)
 % Written by Gabriel Rilling
 function [tmin,tmax,zmin,zmax] = memd_boundary_conditions(indmin,indmax,t,x,z,nbsym)
-	
+	tmin = NaN;
+    tmax = NaN;
+    zmin = NaN;
+    zmax = NaN;
+    
 	lx = length(x);
 	
 	if (length(indmin) + length(indmax) < 3)
-		error('not enough extrema')
+		warning('not enough extrema')
+        return
 	end
 
     % boundary conditions for interpolations :
