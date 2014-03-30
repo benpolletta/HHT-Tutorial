@@ -18,13 +18,15 @@ function [imf,ort] = memd_emd(varargin)
 %       localEMDfunc <[]>   : Handle to a function that accepts as
 %                       arguments: the residual signal <r>, the envelope of
 %                       maxima <envmax>, the envelope of minima <envmin>,
-%                       and the scalar parameter <alpha>; and returns a
-%                       vector of the same size containing the weighting
-%                       function as described in [3] section 3.3.  Since
-%                       this technique can make it impossible to meet an
-%                       independent stopping criterion, the stopping
-%                       criterion is replaced by the condition that all
-%                       elements of the weighting function are zero.
+%                       the scalar parameter <alpha>, and a variable to
+%                       hold any needed parameter values <localEMDparam>;
+%                       and returns a vector of the same size containing
+%                       the weighting function as described in [3] section
+%                       3.3.  Since this technique can make it impossible
+%                       to meet an independent stopping criterion, the
+%                       stopping criterion is replaced by the condition
+%                       that all elements of the weighting function are
+%                       zero.
 %       localEMDparam <{}> : a value containing any additional arguments
 %                       to parameterize the <localEMDfunc>.  Do not use
 %                       a cell array here because the call to 'struct' in
@@ -76,7 +78,7 @@ function [imf,ort] = memd_emd(varargin)
 %       Tung, and H. Liu. The empirical mode decomposition and the Hilbert
 %       spectrum for nonlinear and non-stationary time series analysis.
 %       Proc. R. Soc. Lond. A 1998 454: 903-995
-%   [3] G. Rilling, P. Flandrin, and P. Gonc??alv`es. On empirical mode
+%   [3] G. Rilling, P. Flandrin, and P. Gonc¸alv`es. On empirical mode
 %       decomposition and its algorithms. IEEE-EURASIP workshop on
 %       nonlinear signal and image processing NSIP-03, Grado (I), 2003.
 
@@ -104,8 +106,6 @@ r=s;
 imf = [];
 preprocess_auxdata = [];
 
-figure()
-
 %main loop : requires at least 3 extrema to proceed
 while ~ memd_stop_emd(r) && (k < maxmodes+1 || maxmodes == 0)
     old_r = r;
@@ -132,11 +132,7 @@ while ~ memd_stop_emd(r) && (k < maxmodes+1 || maxmodes == 0)
             w = feval(localEMDfunc, r, envmax, envmin, alpha, ...
                 localEMDparam);
             nr = r - w .* envmoy;
-            plot(nr)
-%             stop_sift = all(w == 0);
-            amp = mean(abs(envmax-envmin))/2;
-            sx = abs(envmoy)./amp;
-            stop_sift = ~(mean(sx > alpha) > 0.05 | any(sx > 10*alpha));
+            stop_sift = all(w == 0);
         else
             nr = r - envmoy;
             switch(stop)
@@ -199,7 +195,7 @@ elseif nargin > 2
   end
 end
 
-% Param??tres par d??faut
+% Paramètres par défaut
 defopts.stop = 'f';
 defopts.alpha = 0.05;
 defopts.maxmodes = 8;
@@ -226,13 +222,13 @@ for nom = names'
   if ~any(strcmpi(char(nom), opt_fields))
     error(['bad option field name: ',char(nom)]);
   end
-  % Et modification des param??tres rentr??s
+  % Et modification des paramètres rentrés
   if ~isempty(eval(['inopts.',char(nom)])) % empty values are discarded
     eval(['opts.', char(nom), ' = inopts.', char(nom),';']);
   end
 end
 
-% Mise ?? jour
+% Mise à jour
 stop = opts.stop;
 alpha = opts.alpha;
 maxmodes = opts.maxmodes;
