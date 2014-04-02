@@ -110,6 +110,10 @@ while ~ memd_stop_emd(r) && (k < maxmodes+1 || maxmodes == 0)
     
     while ~stop_sift
         [tmin,tmax,mmin,mmax] = memd_boundary_conditions(indmin,indmax,t,r,r,6);
+        if isnan(tmin)
+            stop_sift = 1;
+            break
+        end
         envmin = interp1(tmin,mmin,t,'spline'); % Creates min envelope.
         envmax = interp1(tmax,mmax,t,'spline'); % Creates max envelope.
         envmoy = (envmin+envmax)/2; % Creates mean of min and max envelopes (underlying nonstationary/possibly oscillatory trend).
@@ -128,14 +132,6 @@ while ~ memd_stop_emd(r) && (k < maxmodes+1 || maxmodes == 0)
                 w = memd_smoothBinSeries(w, 1000);
             end
             
-%             % Smoothing
-%             winWidth=9;
-%             halfWidth=round(winWidth/2);
-%             gaussWin=gausswin(winWidth);
-%             gaussWin=gaussWin/sum(gaussWin);
-%             w = conv(double(w),gaussWin);
-%             w = w(halfWidth:end-halfWidth+1);
-            
             if aux <= 100
                 w_all(aux+1,:) = w;
             end
@@ -143,7 +139,7 @@ while ~ memd_stop_emd(r) && (k < maxmodes+1 || maxmodes == 0)
             envmoy = w.*envmoy;
             
         end
-            
+
         nr = r - envmoy; % nr stands for "new r".
         
         switch(stop) % Checking whether to stop sifting, using one of two criteria.
@@ -175,7 +171,7 @@ while ~ memd_stop_emd(r) && (k < maxmodes+1 || maxmodes == 0)
     imagesc(t,1:100,w_all)
     title(sprintf('Weights, Sift %d',aux+1))
     
-%     plot_imf_1axis(w_all,t,sprintf('Weights, Sift %d',aux+1))
+    %     plot_imf_1axis(w_all,t,sprintf('Weights, Sift %d',aux+1))
     
     % Defining IMF, possibly with some postprocessing.
     if ~isempty(postprocess)
@@ -202,17 +198,17 @@ function [s,stop,alpha,maxmodes,t,liss,local,postprocess,preprocess, ...
 
 s = varargin{1};
 if nargin == 2
-  if isstruct(varargin{2})
-    inopts = varargin{2};
-  else
-    error('when using 2 arguments the first one is the analyzed signal and the second one is a struct object describing the options')
-  end
+    if isstruct(varargin{2})
+        inopts = varargin{2};
+    else
+        error('when using 2 arguments the first one is the analyzed signal and the second one is a struct object describing the options')
+    end
 elseif nargin > 2
-  try
-    inopts = struct(varargin{2:end});
-  catch
-    error('bad argument syntax')
-  end
+    try
+        inopts = struct(varargin{2:end});
+    catch
+        error('bad argument syntax')
+    end
 end
 
 % Default parameters.
@@ -230,21 +226,21 @@ opt_fields = {'stop','alpha','maxmodes','t','liss','local','postprocess',...
 opts = defopts;
 
 if(nargin==1)
-  inopts = defopts;
+    inopts = defopts;
 elseif nargin == 0
-  error('not enough arguments')
+    error('not enough arguments')
 end
 
 % Some checking
 names = fieldnames(inopts);
 for nom = names'
-  if ~any(strcmpi(char(nom), opt_fields))
-    error(['bad option field name: ',char(nom)])
-  end
-  % Et modification des param??tres rentr??s
-  if ~isempty(eval(['inopts.',char(nom)])) % empty values are discarded
-    eval(['opts.',lower(char(nom)),' = inopts.',char(nom),';'])
-  end
+    if ~any(strcmpi(char(nom), opt_fields))
+        error(['bad option field name: ',char(nom)])
+    end
+    % Et modification des param??tres rentr??s
+    if ~isempty(eval(['inopts.',char(nom)])) % empty values are discarded
+        eval(['opts.',lower(char(nom)),' = inopts.',char(nom),';'])
+    end
 end
 
 % Mise ?? jour
