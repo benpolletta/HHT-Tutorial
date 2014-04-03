@@ -65,6 +65,7 @@ figure(5);plot(t, sum(IMF(4:5,:),1))
 fc = 50/Fs/2;%cutoff frequency
 h=fdesign.lowpass('N,Fc',20,fc);
 d=design(h,'FIR'); %Lowpass FIR filter
+%%
 y=filtfilt(d.Numerator,1,wave); %zero-phase filtering
 Y = 2*abs(fft(y,NFFT))/Nsamp;
 figure;plot(f,Y(1:NFFT/2+1))
