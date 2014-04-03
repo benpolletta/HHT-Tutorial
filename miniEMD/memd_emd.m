@@ -203,7 +203,6 @@ defopts.alpha = 0.05;
 defopts.maxmodes = 20;
 defopts.t = 1:max(size(s));
 defopts.liss = 0;
-defopts.local = 'n';
 defopts.postprocess = [];
 defopts.preprocess = [];
 defopts.pre_params = [];

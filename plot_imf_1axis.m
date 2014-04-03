@@ -1,4 +1,4 @@
-function max_amp = plot_imf_1axis(imf,t,suffixe,max_amp,hF)
+function [max_amp, handle] = plot_imf_1axis(imf,t,suffixe,max_amp,hF,linecolor)
 
 if nargin<2
     t = linspace(0,1,size(imf,2));
@@ -12,7 +12,9 @@ end
 if nargin < 5
     hF = [];
 end
-
+if nargin < 6
+    linecolor = 'k';
+end
 
 M = size(imf,1);
 
@@ -26,11 +28,9 @@ end
 
 if isempty(hF)
     figure;
-    linecolor = 'b';
 else
     hA = findobj(hF, 'Type', 'axes');
     set(hA,'NextPlot', 'add');
-    linecolor = 'r';
 end
 hold on;
 title(suffixe);
@@ -38,7 +38,7 @@ xlabel('Time')
 ylabel('Number')
 
 for i=1:M
-    plot(t,imf(M-i+1,:)+(i-1/2)*max_amp, 'Color', linecolor);
+    handle = plot(t,imf(M-i+1,:)+(i-1/2)*max_amp, 'Color', linecolor);
     hold on;
 end
 
