@@ -3,7 +3,9 @@ function [wave, subwaves] = dg_mkwave(wavespec, Fs)
 % by <wavespec>.  The components are created one at a time, and previously
 % created components can be used as modulation sources for later
 % components.  Does not do any sanity checks on specified values, so
-% stupid results, crashes, etc. can potentially result.
+% stupid results, crashes, etc. can potentially result.  The number of
+% samples created is equal to the length of the vector(s) in
+% <wavespec.freq>.
 %INPUTS
 % wavespec: a vector of struct with the following fields:
 %   form - can be 'sin', 'sqr', 'tri', 'table', 'pink'.  The value 'table'
@@ -78,6 +80,11 @@ for cidx = 1:length(wavespec)
         modgain = wavespec(cidx).freqmod(2);
     end
     % <phase> is in cycles.
+    if isempty(wavespec(cidx).freq)
+        wavespec(cidx).freq = ones(nsamp, 1);
+    elseif isscalar(wavespec(cidx).freq)
+        wavespec(cidx).freq = wavespec(cidx).freq * ones(nsamp, 1);
+    end
     phase = cumsum((wavespec(cidx).freq + ...
         modgain * subwaves(:, modidx)) * Ts);
     if isempty(wavespec(cidx).ampmod) || wavespec(cidx).ampmod(2) == 0
