@@ -21,7 +21,7 @@ IMF_temp{1} = memd_emd(data);
 
 no_IMFs(1) = size(IMF_temp{1},1);
 
-[max_amp,~] = plot_imf_1axis(IMF_temp{1},t,'Non-Local');
+[max_amp,~] = plot_imf_1axis(IMF_temp{1},t,'Non-Local', [], [], [], data);
 
 for w = 1:no_windows
     
