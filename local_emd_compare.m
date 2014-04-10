@@ -4,7 +4,7 @@ datalength = length(data);
 
 t=(1:datalength)/sampling_freq;
 
-no_windows = length(smooth_vec)
+no_windows = length(smooth_vec);
 
 colors = [linspace(1,0,no_windows)' abs(linspace(1,0,no_windows)'-.5) linspace(0,1,no_windows)'];
 
@@ -24,9 +24,9 @@ for w = 1:no_windows
     
     IMF_temp{w+1} = memd_emd(data,struct('localEMDfunc',localEMDfunc,'localEMDparam',smooth_vec(w)));
     
-    plot_imf_1axis(IMF_temp{w},t,['Smoothing Window = ',num2str(smooth_vec(w)),' ms.']);
+    plot_imf_1axis(IMF_temp{w+1},t,['Smoothing Window = ',num2str(smooth_vec(w)),' ms.']);
     
-    no_IMFs(w) = size(IMF_temp{w},1);
+    no_IMFs(w+1) = size(IMF_temp{w+1},1);
     
 end
 
@@ -36,11 +36,9 @@ IMF = zeros(max_no_IMFs, datalength, no_windows+1);
 
 for w=1:(no_windows+1)
     
-    IMF_w = IMF_temp{w};
+    [r,c] = size(IMF_temp{w});
     
-    [r,c] = size(IMF_w);
-    
-    IMF(1:r,1:c,w) = IMF_w;
+    IMF(1:r,1:c,w) = IMF_temp{w};
     
 end
 
@@ -54,6 +52,9 @@ for w = 1:no_windows
     plot_imf_1axis(IMF_diff(:,:,w),t,'',max_amp,handle,colors(w,:));
     
 end
+
+set(handle,'ColorMap',colors)
+colorbar('YTick',(1:no_windows)+.5,'YTickLabel',fliplr(smooth_vec))
 
 [IMF1_morlet,f,~] = IMF_morlet(IMF(:,:,1),1000,0);
 

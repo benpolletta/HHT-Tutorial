@@ -43,5 +43,6 @@ for i=1:M
 end
 
 set(gca,'YTick',([1:M]-1/2)*max_amp,'YTickLabel',M:-1:1)
+xlim([min(t) max(t)])
 
 end

@@ -20,7 +20,7 @@ end
 envmoy = w.*envmoy;
 amp = mean(abs(envmax-envmin))/2; % Half of mean difference of max. and min. envelopes is the mean amp. of the signal.
 sx = abs(envmoy)./amp; % Divide underlying trend by this mean amplitude at each point.
-if ~(mean(sx > alpha) > 0.05 | any(sx > 10*alpha))
+if ~(mean(sx > alpha) > 0.05 || any(sx > 10*alpha))
     % stop sifting
     w = zeros(size(r));
 end
