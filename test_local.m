@@ -1,0 +1,16 @@
+% Test local.
+
+%%
+rng(0);
+local_wave = make_local_waves(500);
+local_emd_compare(2000,local_wave,700:-100:300,@benp_emd_local)
+
+%%
+rng(0);
+local_wave = make_local_triangle_waves(500);
+local_emd_compare(2000,local_wave,700:-100:300,@benp_emd_local)
+
+%%
+rng(0);
+local_wave = make_transition_wave(5000);
+local_emd_compare(2000,local_wave,700:-100:300,@benp_emd_local)
