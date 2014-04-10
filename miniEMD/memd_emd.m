@@ -34,6 +34,8 @@ function [imf,ort] = memd_emd(varargin)
 %                       However, a struct will work fine for passing in
 %                       multiple values of different types.
 %       maxmodes    <8>     : Maximum number of IMFs; <0> means no maximum.
+%       maxsift     <8>     : Maximum number of sifts; <0> means no
+%                       maximum, and default is 200.
 %       postprocess <empty> : Handle to a function that accepts as
 %                       arguments (1) the newly extracted IMF <r> and (2)
 %                       the structure of auxiliary values returned by its
@@ -98,7 +100,7 @@ function [imf,ort] = memd_emd(varargin)
 
 
 % Gets the parameter
-[s, stop, alpha, maxmodes, t, liss, postprocess, preprocess, ...
+[s, stop, alpha, maxmodes, maxsift, t, liss, postprocess, preprocess, ...
     pre_params, localEMDfunc, localEMDparam] = init(varargin{:});
 
 k = 1;
@@ -107,7 +109,7 @@ imf = [];
 preprocess_auxdata = [];
 
 %main loop : requires at least 3 extrema to proceed
-while ~ memd_stop_emd(r) && (k < maxmodes+1 || maxmodes == 0)
+while ~memd_stop_emd(r) && (k < maxmodes+1 || maxmodes == 0)
     old_r = r;
     tmp = r;
     % padding
@@ -117,33 +119,41 @@ while ~ memd_stop_emd(r) && (k < maxmodes+1 || maxmodes == 0)
     
     % Sifting
     stop_sift=0;
-    aux=0;
+    aux=0;  % number of sifts completed
     
     if ~isempty(preprocess)
         [r, preprocess_auxdata] = feval(preprocess, r, pre_params);
     end
     
     while ~stop_sift
-        [tmin,tmax,mmin,mmax] = memd_boundary_conditions(indmin,indmax,t,r,r,6);
-        envmin = interp1(tmin,mmin,t,'spline');
-        envmax = interp1(tmax,mmax,t,'spline');
-        envmoy = (envmin+envmax)/2;
-        if ~isempty(localEMDfunc)
-            w = feval(localEMDfunc, r, envmax, envmin, alpha, ...
-                localEMDparam);
-            nr = r - w .* envmoy;
-            stop_sift = all(w == 0);
+        [tmin,tmax,mmin,mmax] = memd_boundary_conditions(indmin,indmax,...
+            t,r,r,6);
+        if isnan(tmin)
+            stop_sift = true;
+            warning('memd_emd:stop1', ...
+                'Stopped sifting due to failure of memd_boundary_conditions');
         else
-            nr = r - envmoy;
-            switch(stop)
-                case 'f'
-                    % Flandrin
-                    amp = mean(abs(envmax-envmin))/2;
-                    sx = abs(envmoy)./amp;
-                    stop_sift = ~(mean(sx > alpha) > 0.05 | any(sx > 10*alpha));
-                case 'h'
-                    % Huang
-                    stop_sift = norm(nr-r)/(norm(r)+eps) < alpha;
+            envmin = interp1(tmin,mmin,t,'spline');
+            envmax = interp1(tmax,mmax,t,'spline');
+            envmoy = (envmin+envmax)/2;
+            if ~isempty(localEMDfunc)
+                w = feval(localEMDfunc, r, envmax, envmin, alpha, ...
+                    localEMDparam);
+                nr = r - w .* envmoy;
+                stop_sift = all(w == 0);
+            else
+                nr = r - envmoy;
+                switch(stop)
+                    case 'f'
+                        % Flandrin
+                        amp = mean(abs(envmax-envmin))/2;
+                        sx = abs(envmoy)./amp;
+                        stop_sift = ~(mean(sx > alpha) > 0.05 | ...
+                            any(sx > 10*alpha));
+                    case 'h'
+                        % Huang
+                        stop_sift = norm(nr-r)/(norm(r)+eps) < alpha;
+                end
             end
         end
         
@@ -151,6 +161,11 @@ while ~ memd_stop_emd(r) && (k < maxmodes+1 || maxmodes == 0)
             r=nr;
             aux=aux+1;
             [indmin,indmax] = memd_extr(r);
+            if aux >= maxsift
+                stop_sift = true;
+                warning('memd_emd:stop2', ...
+                    'Stopped sifting due to maxsift=%d', maxsift);
+            end
         end
     end
     
@@ -175,7 +190,7 @@ end
 end
 
 
-function [s, stop, alpha, maxmodes, t, liss, postprocess, preprocess, ...
+function [s, stop, alpha, maxmodes, maxsift, t, liss, postprocess, preprocess, ...
     pre_params, localEMDfunc, localEMDparam] = init(varargin)
 % INIT : internal function for the initialization of the parameters.
 % Returns <s> as a row vector.
@@ -199,6 +214,7 @@ end
 defopts.stop = 'f';
 defopts.alpha = 0.05;
 defopts.maxmodes = 8;
+defopts.maxsift = 200;
 defopts.t = 1:max(size(s));
 defopts.liss = 0;
 defopts.postprocess = [];
@@ -206,8 +222,8 @@ defopts.preprocess = [];
 defopts.pre_params = [];
 defopts.localEMDfunc = [];
 defopts.localEMDparam = {};
-opt_fields = {'stop','alpha','maxmodes','t','liss','postprocess',...
-    'preprocess','pre_params','localEMDfunc','localEMDparam'};
+opt_fields = {'stop','alpha','maxmodes','maxsift','t','liss',...
+    'postprocess','preprocess','pre_params','localEMDfunc','localEMDparam'};
 opts = defopts;
 
 if(nargin==1)
@@ -232,6 +248,7 @@ end
 stop = opts.stop;
 alpha = opts.alpha;
 maxmodes = opts.maxmodes;
+maxsift = opts.maxsift;
 t = opts.t;
 liss = opts.liss;
 postprocess = opts.postprocess;
