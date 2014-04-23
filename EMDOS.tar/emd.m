@@ -158,6 +158,7 @@
 function [imf,ort,nbits] = emd(varargin)
 
 [x,t,sd,sd2,tol,MODE_COMPLEX,ndirs,display_sifting,sdt,sd2t,r,imf,k,nbit,NbIt,MAXITERATIONS,FIXE,FIXE_H,MAXMODES,INTERP,mask] = init(varargin{:});
+% [x,t,sd,sd2,tol,ndirs,sdt,sd2t,r,imf,k,nbit,NbIt,MAXITERATIONS,FIXE,FIXE_H,MAXMODES,INTERP]
 
 if display_sifting
   fig_h = figure;
@@ -673,8 +674,149 @@ end
 ort = 0.5*s;
 end
 %---------------------------------------------------------------------------------------------------
-
-function [x,t,sd,sd2,tol,ndirs,sdt,sd2t,r,imf,k,nbit,NbIt,MAXITERATIONS,FIXE,FIXE_H,MAXMODES,INTERP] = init(varargin)
+% 
+% function [x,t,sd,sd2,tol,ndirs,sdt,sd2t,r,imf,k,nbit,NbIt,MAXITERATIONS,FIXE,FIXE_H,MAXMODES,INTERP] = init(varargin)
+% 
+% x = varargin{1};
+% if nargin == 2
+%   if isstruct(varargin{2})
+%     inopts = varargin{2};
+%   else
+%     error('when using 2 arguments the first one is the analyzed signal X and the second one is a struct object describing the options')
+%   end
+% elseif nargin > 2
+%   try
+%     inopts = struct(varargin{2:end});
+%   catch
+%     error('bad argument syntax')
+%   end
+% end
+% 
+% % default for stopping
+% defstop = [0.05,0.5,0.05];
+% 
+% opt_fields = {'t','stop','maxiterations','fix','maxmodes','interp','fix_h','ndirs'};
+% 
+% defopts.stop = defstop;
+% defopts.t = 1:max(size(x));
+% defopts.maxiterations = 2000;
+% defopts.fix = 0;
+% defopts.maxmodes = 0;
+% defopts.interp = 'spline';
+% defopts.fix_h = 0;
+% defopts.ndirs = 4;
+% 
+% opts = defopts;
+% 
+% 
+% 
+% if(nargin==1)
+%   inopts = defopts;
+% elseif nargin == 0
+%   error('not enough arguments')
+% end
+% 
+% 
+% names = fieldnames(inopts);
+% for nom = names'
+%   if ~any(strcmpi(char(nom), opt_fields))
+%     error(['bad option field name: ',char(nom)])
+%   end
+%   if ~isempty(eval(['inopts.',char(nom)])) % empty values are discarded
+%     eval(['opts.',lower(char(nom)),' = inopts.',char(nom),';'])
+%   end
+% end
+% 
+% t = opts.t;
+% stop = opts.stop;
+% MAXITERATIONS = opts.maxiterations;
+% FIXE = opts.fix;
+% MAXMODES = opts.maxmodes;
+% INTERP = opts.interp;
+% FIXE_H = opts.fix_h;
+% ndirs = opts.ndirs;
+% 
+% if ~isvector(x)
+%   error('X must have only one row or one column')
+% end
+% 
+% if size(x,1) > 1
+%   x = x.';
+% end
+% 
+% if ~isvector(t)
+%   error('option field T must have only one row or one column')
+% end
+% 
+% if ~isreal(t)
+%   error('time instants T must be a real vector')
+% end
+% 
+% if size(t,1) > 1
+%   t = t';
+% end
+% 
+% if (length(t)~=length(x))
+%   error('X and option field T must have the same length')
+% end
+% 
+% if ~isvector(stop) || length(stop) > 3
+%   error('option field STOP must have only one row or one column of max three elements')
+% end
+% 
+% if ~all(isfinite(x))
+%   error('data elements must be finite')
+% end
+% 
+% if size(stop,1) > 1
+%   stop = stop';
+% end
+% 
+% L = length(stop);
+% if L < 3
+%   stop(3)=defstop(3);
+% end
+% 
+% if L < 2
+%   stop(2)=defstop(2);
+% end
+% 
+% 
+% if ~ischar(INTERP) || ~any(strcmpi(INTERP,{'linear','cubic','spline'}))
+%   error('INTERP field must be ''linear'', ''cubic'', ''pchip'' or ''spline''')
+% end
+% 
+% 
+% sd = stop(1);
+% sd2 = stop(2);
+% tol = stop(3);
+% 
+% lx = length(x);
+% 
+% sdt = sd*ones(1,lx);
+% sd2t = sd2*ones(1,lx);
+% 
+% if FIXE
+%   MAXITERATIONS = FIXE;
+%   if FIXE_H
+%     error('cannot use both ''FIX'' and ''FIX_H'' modes')
+%   end
+% end
+% 
+% 
+% r = x;
+% 
+% imf = [];
+% k = 1;
+% 
+% % iterations counter for extraction of 1 mode
+% nbit=0;
+% 
+% % total iterations counter
+% NbIt=0;
+% end
+%---------------------------------------------------------------------------------------------------
+function [x,t,sd,sd2,tol,MODE_COMPLEX,ndirs,display_sifting,sdt,sd2t,r,imf,k,nbit,NbIt,MAXITERATIONS,FIXE,FIXE_H,MAXMODES,INTERP,mask] = init(varargin)
 
 x = varargin{1};
 if nargin == 2
@@ -694,16 +836,19 @@ end
 % default for stopping
 defstop = [0.05,0.5,0.05];
 
-opt_fields = {'t','stop','maxiterations','fix','maxmodes','interp','fix_h','ndirs'};
+opt_fields = {'t','stop','display','maxiterations','fix','maxmodes','interp','fix_h','mask','ndirs','complex_version'};
 
 defopts.stop = defstop;
+defopts.display = 0;
 defopts.t = 1:max(size(x));
 defopts.maxiterations = 2000;
 defopts.fix = 0;
 defopts.maxmodes = 0;
 defopts.interp = 'spline';
 defopts.fix_h = 0;
+defopts.mask = 0;
 defopts.ndirs = 4;
+defopts.complex_version = 2;
 
 opts = defopts;
 
@@ -728,12 +873,15 @@ end
 
 t = opts.t;
 stop = opts.stop;
+display_sifting = opts.display;
 MAXITERATIONS = opts.maxiterations;
 FIXE = opts.fix;
 MAXMODES = opts.maxmodes;
 INTERP = opts.interp;
 FIXE_H = opts.fix_h;
+mask = opts.mask;
 ndirs = opts.ndirs;
+complex_version = opts.complex_version;
 
 if ~isvector(x)
   error('X must have only one row or one column')
@@ -785,6 +933,35 @@ if ~ischar(INTERP) || ~any(strcmpi(INTERP,{'linear','cubic','spline'}))
   error('INTERP field must be ''linear'', ''cubic'', ''pchip'' or ''spline''')
 end
 
+%special procedure when a masking signal is specified
+if any(mask)
+  if ~isvector(mask) || length(mask) ~= length(x)
+    error('masking signal must have the same dimension as the analyzed signal X')
+  end
+
+  if size(mask,1) > 1
+    mask = mask.';
+  end
+  opts.mask = 0;
+  imf1 = emd(x+mask,opts);
+  imf2 = emd(x-mask,opts);
+  if size(imf1,1) ~= size(imf2,1)
+    warning('emd:warning',['the two sets of IMFs have different sizes: ',int2str(size(imf1,1)),' and ',int2str(size(imf2,1)),' IMFs.'])
+  end
+  S1 = size(imf1,1);
+  S2 = size(imf2,1);
+  if S1 ~= S2
+    if S1 < S2
+      tmp = imf1;
+      imf1 = imf2;
+      imf2 = tmp;
+    end
+    imf2(max(S1,S2),1) = 0;
+  end
+  imf = (imf1+imf2)/2;
+
+end
+
 
 sd = stop(1);
 sd2 = stop(2);
@@ -802,10 +979,21 @@ if FIXE
   end
 end
 
+MODE_COMPLEX = ~isreal(x)*complex_version;
+if MODE_COMPLEX && complex_version ~= 1 && complex_version ~= 2
+  error('COMPLEX_VERSION parameter must equal 1 or 2')
+end
+
+
+% number of extrema and zero-crossings in residual
+ner = lx;
+nzr = lx;
 
 r = x;
 
-imf = [];
+if ~any(mask) % if a masking signal is specified "imf" already exists at this stage
+  imf = [];
+end
 k = 1;
 
 % iterations counter for extraction of 1 mode

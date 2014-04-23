@@ -129,5 +129,10 @@ IMFxFilt = emdos(yband,'method','emd');
 figure;plot_imf(IMFxFilt,t,'band-pass Filtered')
 MSE(5) = sum((x01-IMFxFilt(1,:)).^2)*dt;
 
-%% Now need to estimate phase
+%% Compare with CEEMD
+Nstd = .01*std(x,1); NR = 100; MaxIter = 20;
+[CIMFy it] = ceemdan(x,Nstd,NR,MaxIter);
+figure;plot_imf(CIMFy,t,'CEEMD')
+[CIMFy it] = ceemdan(x0,Nstd,NR,MaxIter);
+figure;plot_imf(CIMFy,t,'CEEMD')
 
