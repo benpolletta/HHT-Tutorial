@@ -53,6 +53,10 @@ function [wave, subwaves] = dg_mkwave(wavespec, Fs)
 %$Date: 2014-01-24 18:48:11 -0500 (Fri, 24 Jan 2014) $
 %$Author: dgibson $
 
+% (c) 2014 Daniel J. Gibson, all rights reserved.
+% This code may not be used or copied without written permission of the
+% author.  Please email dgibson@mit.edu.
+
 % Find number of samples.
 nsamp = 1;
 for cidx = 1:length(wavespec)
@@ -167,5 +171,3 @@ end
 
 % And finally...
 wave = sum(subwaves, 2);
-
-
